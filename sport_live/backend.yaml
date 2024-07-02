@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: sasha-the-king
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: evgenyniko/scraping_project-backend:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          envFrom:
+          - configMapRef:
+              name: app-env
+          env:
+            - name: SASL_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: client-passwords
+                  name: kafka-user-passwords
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MONGO_USER
+              value: "root"
+            - name: MONGO_HOST
+              value: "mongo-mongodb.mongodb.svc.cluster.local"
+            - name: MONGO_PORT
+              value: "27017"
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-mongodb
+                  key: mongodb-root-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: sasha-the-king
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30110
+  type: NodePort

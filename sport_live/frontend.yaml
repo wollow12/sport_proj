@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: sasha-the-king
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: sashapo12/scraping_project-frontend:1.0.5
+          ports:
+            - containerPort: 5000
+          envFrom:
+          - configMapRef:
+              name: app-env
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SASL_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: client-passwords
+                  name: kafka-user-passwords
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: sasha-the-king
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30109
+  type: NodePort

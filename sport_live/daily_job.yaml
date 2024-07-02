@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dailt
+  namespace: sasha-the-king
+spec:
+  template:
+    metadata:
+      labels:
+        app: daily
+    spec:
+      containers:
+      - name: my-container
+        image: oraharon/daily_scraper:1
+        envFrom:
+        - configMapRef:
+            name: app-env
+        env:
+        - name: DISCORD_URL
+          value: "https://discord.com/api/webhooks/1253329204490010724/FncREuKLNeyutXZBdu28ZIDEoTFiWWImBdKfnoiNMF2D2goegLetwW7JmZBw_hEr-Ft4"
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SASL_PASS
+          valueFrom:
+            secretKeyRef:
+              key: client-passwords
+              name: kafka-user-passwords
+      restartPolicy: Never
+  backoffLimit: 0

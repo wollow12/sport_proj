@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-env
+  namespace: sasha-the-king
+data:
+  KAFKA_PRODUCER: "kafka-controller-0.kafka-controller-headless.kafka.svc.cluster.local"
+  KAFKA_CONSUMER: "kafka.kafka.svc.cluster.local:9092"
+  KAFKA_PORT: "9092"
+  SASL_USER: "user1"
